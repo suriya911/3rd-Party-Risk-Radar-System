@@ -121,4 +121,10 @@ export const api = {
     const qs = windowDays ? `?window_days=${windowDays}` : "";
     return request<BlastRadius>(`/threats/blast-radius${qs}`);
   },
+
+  addVendor: (v: { name: string; domain: string; weight?: number; stack_role?: string }) =>
+    request<{ added: string }>("/vendors/add", {
+      method: "POST",
+      body: JSON.stringify(v),
+    }),
 };

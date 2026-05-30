@@ -4,6 +4,7 @@ import { api, Vendor } from "../api/client";
 import VendorTable from "../components/VendorTable";
 import AlertFeed from "../components/AlertFeed";
 import BlastRadiusPanel from "../components/BlastRadiusPanel";
+import AddVendor from "../components/AddVendor";
 import UnblockedProofPanel from "../components/UnblockedProofPanel";
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -74,8 +75,15 @@ export default function Dashboard() {
             <Radio className="h-6 w-6 text-blue-400" />
             <h1 className="text-2xl font-bold text-white">Third-Party Risk Radar</h1>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
-            Continuous, cited vendor risk intelligence — powered by Bright Data
+          <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+              </span>
+              Live
+            </span>
+            · Continuous, cited vendor risk intelligence — powered by Bright Data
           </p>
         </div>
         <button
@@ -155,6 +163,28 @@ export default function Dashboard() {
       <div className="mt-6">
         <UnblockedProofPanel />
       </div>
+
+      {/* Add a custom vendor */}
+      <div className="mt-6">
+        <AddVendor onAdded={load} />
+      </div>
+
+      {/* Footer — sponsor credits */}
+      <footer className="mt-10 border-t border-white/5 pt-6 text-center text-xs text-slate-600">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+          <span>Built for</span>
+          <span className="font-semibold text-slate-400">Web Data UNLOCKED — Bright Data</span>
+          <span>·</span>
+          <span>Live web via <span className="text-slate-400">Bright Data SERP + Web Unlocker</span></span>
+          <span>·</span>
+          <span>AI extraction via <span className="text-slate-400">AI/ML API</span></span>
+          <span>·</span>
+          <span>Agent tools via <span className="text-slate-400">MCP</span></span>
+        </div>
+        <div className="mt-2 text-slate-700">
+          Third-Party Risk Radar — continuous, cited vendor risk intelligence
+        </div>
+      </footer>
     </div>
   );
 }

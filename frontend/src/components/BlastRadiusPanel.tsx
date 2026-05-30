@@ -123,7 +123,7 @@ export default function BlastRadiusPanel() {
 
   useEffect(() => {
     api
-      .getBlastRadius(30)
+      .getBlastRadius(7)
       .then((r) => {
         setIncidents(r.incidents);
         setStandalone(r.standalone.filter((s) => s.verdict !== "NO_ACTION"));
@@ -149,7 +149,7 @@ export default function BlastRadiusPanel() {
         )}
       </div>
       <p className="mb-4 text-xs text-slate-500">
-        Recent security incidents that connect multiple of your vendors — and whether to act.
+        Security incidents from the last 7 days that connect multiple of your vendors — and whether to act.
       </p>
 
       {loading ? (

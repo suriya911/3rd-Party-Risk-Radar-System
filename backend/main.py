@@ -8,7 +8,7 @@ from io import StringIO
 from pathlib import Path
 from typing import Optional
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
+from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -20,6 +20,9 @@ from backend.collectors.scraper_collector import collect_scraper
 from backend.extraction.claude_extractor import extract_signals
 from backend.scoring.risk_scorer import score_and_persist, score_label, score_color
 from backend.analysis.blast_radius import detect_blast_radius
+from backend.mcp_server.server import server as mcp_server
+from mcp.server.sse import SseServerTransport
+from starlette.routing import Mount
 
 logging.basicConfig(level=getattr(logging, settings.log_level))
 logger = logging.getLogger(__name__)
@@ -253,6 +256,27 @@ async def unblocked_proof(url: str = "https://haveibeenpwned.com/"):
     )
 
 
+class VendorIn(BaseModel):
+    name: str
+    domain: str
+    weight: float = 1.0
+    stack_role: str = ""
+
+
+@app.post("/vendors/add", tags=["vendors"])
+async def add_vendor(vendor: VendorIn):
+    """Add (or update) a single custom vendor to monitor."""
+    if not vendor.name.strip() or not vendor.domain.strip():
+        raise HTTPException(400, "name and domain are required")
+    db.upsert_vendor(
+        name=vendor.name.strip(),
+        domain=vendor.domain.strip(),
+        weight=vendor.weight,
+        stack_role=vendor.stack_role.strip(),
+    )
+    return {"added": vendor.name.strip()}
+
+
 @app.post("/vendors/import", tags=["vendors"])
 async def import_vendors(file: UploadFile = File(...)):
     """Import vendors from an uploaded CSV file (name, domain, weight, stack_role)."""
@@ -272,9 +296,9 @@ async def import_vendors(file: UploadFile = File(...)):
 
 
 @app.get("/threats/blast-radius", tags=["threats"])
-async def blast_radius(window_days: int = 30):
+async def blast_radius(window_days: int = 7):
     """
-    Blast Radius — cross-vendor cascade exposure.
+    Blast Radius — cross-vendor cascade exposure (last 7 days by default).
 
     Finds recent security incidents that connect two or more of your vendors
     (shared attacker, OAuth token, identity provider, cross-vendor mention) and
@@ -284,6 +308,22 @@ async def blast_radius(window_days: int = 30):
     """
     signals = db.get_latest_run_signals_all()
     return detect_blast_radius(signals, window_days=window_days)
+
+
+# ── Online MCP server (SSE) ────────────────────────────────────────────────
+# Exposes the same MCP tools (get_vendor_risk, list_high_risk_vendors,
+# whats_new_since, check_exposure) over the network so a remote Claude/agent can
+# connect to https://<host>/mcp/sse — no local install needed.
+_sse = SseServerTransport("/mcp/messages/")
+
+
+@app.get("/mcp/sse", tags=["mcp"], include_in_schema=False)
+async def mcp_sse(request: Request):
+    async with _sse.connect_sse(request.scope, request.receive, request._send) as (read, write):
+        await mcp_server.run(read, write, mcp_server.create_initialization_options())
+
+
+app.router.routes.append(Mount("/mcp/messages/", app=_sse.handle_post_message))
 
 
 @app.get("/health", tags=["system"])

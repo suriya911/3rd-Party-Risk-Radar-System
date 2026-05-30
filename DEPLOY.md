@@ -85,12 +85,38 @@ After adding secrets, **Restart** the Space.
 
 ---
 
-## 3. The MCP server (Claude Desktop) — not part of web hosting
+## 3. The MCP server — now hosted online (SSE)
 
-The MCP server runs **locally** as a subprocess that Claude Desktop launches; it
-is not deployed to the web host. Use `claude_desktop_config.json`, set the
-absolute path, restart Claude Desktop, then ask
-*"Which vendors had a new security issue this week?"*
+The MCP server is exposed over the network by the same FastAPI app, so a remote
+Claude/agent can connect with no local install:
+
+```
+https://<your-space>.hf.space/mcp/sse
+```
+
+Tools available: `get_vendor_risk`, `list_high_risk_vendors`, `whats_new_since`,
+and `check_exposure` (Blast Radius — *"which of my vendors are exposed through
+each other?"*).
+
+**Connect Claude Desktop to the hosted server** via the `mcp-remote` bridge in
+`claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "risk-radar": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://<your-space>.hf.space/mcp/sse"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop, then ask *"Am I exposed to any cascading breach this
+week?"* — it calls `check_exposure` on the live server.
+
+> The classic **local stdio** mode still works too:
+> `python -m backend.mcp_server.server` (no path/URL needed).
 
 ---
 

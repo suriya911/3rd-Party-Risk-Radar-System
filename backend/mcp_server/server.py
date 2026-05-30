@@ -95,8 +95,8 @@ async def list_tools() -> list[Tool]:
                 "properties": {
                     "window_days": {
                         "type": "number",
-                        "description": "How many days back to consider. Default: 30.",
-                        "default": 30,
+                        "description": "How many days back to consider. Default: 7.",
+                        "default": 7,
                     }
                 },
             },
@@ -194,7 +194,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text="\n".join(lines))]
 
     elif name == "check_exposure":
-        window = int(arguments.get("window_days", 30))
+        window = int(arguments.get("window_days", 7))
         report = detect_blast_radius(db.get_latest_run_signals_all(), window_days=window)
         incidents = report["incidents"]
         standalone = [s for s in report["standalone"] if s["verdict"] != "NO_ACTION"]
