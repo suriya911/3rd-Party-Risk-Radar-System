@@ -1,0 +1,11 @@
+name,domain,weight,stack_role
+AWS,aws.amazon.com,1.5,Cloud / infra
+Cloudflare,cloudflare.com,1.3,CDN / edge
+Okta,okta.com,1.4,Identity / SSO
+Snowflake,snowflake.com,1.2,Data warehouse
+Salesforce,salesforce.com,1.3,CRM
+GitHub,github.com,1.2,Source control
+CrowdStrike,crowdstrike.com,1.2,Endpoint security
+Slack,slack.com,1.1,Communications
+Workday,workday.com,1.3,HR / payroll
+Datadog,datadoghq.com,1.0,Observability
