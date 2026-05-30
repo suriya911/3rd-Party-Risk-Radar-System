@@ -1,4 +1,4 @@
-# Deploy — Third-Party Risk Radar
+# Deploy — Vendor Radar Risk
 
 The whole app (FastAPI API **+** built React dashboard) ships as **one Docker
 container** listening on port **7860**. The frontend talks to the API on the same

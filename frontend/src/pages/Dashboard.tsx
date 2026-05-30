@@ -86,7 +86,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-2">
             <Radio className="h-6 w-6 text-blue-400" />
-            <h1 className="text-2xl font-bold text-white">Third-Party Risk Radar</h1>
+            <h1 className="text-2xl font-bold text-white">Vendor Radar Risk</h1>
           </div>
           <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
             <span className="inline-flex items-center gap-1.5">
@@ -195,7 +195,7 @@ export default function Dashboard() {
           <span>Agent tools via <span className="text-slate-400">MCP</span></span>
         </div>
         <div className="mt-2 text-slate-700">
-          Third-Party Risk Radar — continuous, cited vendor risk intelligence
+          Vendor Radar Risk — continuous, cited vendor risk intelligence
         </div>
       </footer>
     </div>

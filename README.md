@@ -1,5 +1,5 @@
 ---
-title: Third-Party Risk Radar
+title: Vendor Radar Risk
 emoji: 📡
 colorFrom: blue
 colorTo: indigo
@@ -8,7 +8,7 @@ app_port: 7860
 pinned: false
 ---
 
-# Third-Party Risk Radar
+# Vendor Radar Risk
 
 **Continuous, cited vendor risk intelligence — built on Bright Data live web infrastructure**
 
@@ -85,7 +85,7 @@ Add to your Claude Desktop `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "third-party-risk-radar": {
+    "vendor-radar-risk": {
       "command": "python",
       "args": ["-m", "backend.mcp_server.server"],
       "cwd": "/path/to/3rd-Party-Risk-Radar-System"

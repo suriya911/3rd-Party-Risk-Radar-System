@@ -1,4 +1,4 @@
-# Project Status — Third-Party Risk Radar
+# Project Status — Vendor Radar Risk
 
 **Date:** 2026-05-30  
 **Hackathon:** Web Data UNLOCKED — Enterprise AI, Bright Data (San Francisco)

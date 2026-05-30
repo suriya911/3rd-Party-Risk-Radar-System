@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vendor Radar Risk — Pitch</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#1a1d2e; --ink:#e7ecf3; --mut:#8b95a7; --dim:#5b6577;
+    --blue:#5b8cff; --purple:#a78bfa; --red:#ff6b6b; --amber:#ffc14d; --green:#46d39a;
+    --line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+  .deck{height:100vh;width:100vw;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:6vh 9vw;animation:fade .35s ease}
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(34px,5.4vw,72px);line-height:1.05;letter-spacing:-.02em;font-weight:800}
+  h2{font-size:clamp(26px,3.6vw,46px);line-height:1.1;letter-spacing:-.01em;font-weight:800;margin-bottom:.5em}
+  h2 .accent{color:var(--purple)}
+  .kicker{text-transform:uppercase;letter-spacing:.22em;font-size:13px;color:var(--blue);font-weight:700;margin-bottom:18px}
+  p.lead{font-size:clamp(17px,2vw,24px);color:var(--mut);max-width:60ch}
+  ul{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:10px}
+  li{font-size:clamp(16px,1.7vw,22px);padding-left:28px;position:relative;color:var(--ink)}
+  li:before{content:"▸";position:absolute;left:0;color:var(--purple)}
+  li small{color:var(--mut);font-size:.8em}
+  .grid{display:grid;gap:18px;margin-top:8px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:15px;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .card p{color:var(--mut);font-size:15px}
+  .stat{font-size:clamp(28px,3.4vw,44px);font-weight:800;font-variant-numeric:tabular-nums}
+  .stat.red{color:var(--red)} .stat.green{color:var(--green)} .stat.purple{color:var(--purple)} .stat.blue{color:var(--blue)}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;flex:1;min-width:130px}
+  .node b{display:block;font-size:15px;margin-bottom:4px}
+  .node span{font-size:13px;color:var(--mut)}
+  .node.bd{border-color:rgba(91,140,255,.4)} .node.ai{border-color:rgba(167,139,250,.45)}
+  .node.out{border-color:rgba(70,211,154,.4)}
+  .arrow{display:flex;align-items:center;color:var(--dim);font-size:22px}
+  .pill{display:inline-block;background:rgba(167,139,250,.16);color:var(--purple);border:1px solid rgba(167,139,250,.35);
+    border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;margin:0 6px 6px 0}
+  .pill.bd{background:rgba(91,140,255,.14);color:var(--blue);border-color:rgba(91,140,255,.35)}
+  .verdict{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px}
+  .v-inv{background:rgba(255,107,107,.16);color:var(--red);border:1px solid rgba(255,107,107,.4)}
+  .chip{display:inline-block;background:rgba(91,140,255,.16);color:#cfe0ff;border-radius:8px;padding:3px 10px;font-size:14px;font-weight:600;margin:3px}
+  .foot{position:absolute;bottom:24px;left:9vw;right:9vw;display:flex;justify-content:space-between;
+    color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:12px}
+  .progress{position:absolute;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s}
+  .title-wrap .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--mut);font-size:14px;margin-bottom:26px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfe0ff}
+  .src{color:var(--green)}
+  .hint{position:absolute;bottom:20px;right:24px;color:var(--dim);font-size:12px}
+  b.k{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide active title-wrap">
+    <span class="kicker">Web Data UNLOCKED · Bright Data × Enterprise AI</span>
+    <h1>Vendor<br>Radar Risk</h1>
+    <p class="lead" style="margin-top:22px">Continuous, cited vendor-risk intelligence from the live web — with <b class="k">Blast Radius</b> cascade detection that tells you <i>which</i> connected vendors to investigate, and when.</p>
+    <div style="margin-top:30px">
+      <span class="pill bd">Bright Data SERP</span>
+      <span class="pill bd">Web Unlocker</span>
+      <span class="pill">AI/ML API · Claude</span>
+      <span class="pill">Hosted MCP</span>
+    </div>
+    <div class="foot"><span>Team bigbros</span><span>Live demo · github.com/suriya911/3rd-Party-Risk-Radar-System</span></div>
+  </section>
+
+  <!-- 2 PROBLEM -->
+  <section class="slide">
+    <span class="kicker">The Problem</span>
+    <h2>You learn your vendor was breached <span class="accent">from the news</span> — weeks late.</h2>
+    <ul>
+      <li>Enterprises depend on dozens of third parties — identity, CRM, data, CDN.</li>
+      <li>Worse: breaches <b class="k">cascade</b>. One stolen OAuth token, one compromised identity provider spreads to every connected vendor.</li>
+      <li>Companies have a vendor <i>list</i> — but <b class="k">zero visibility into the connections between vendors</b>.</li>
+      <li>So they can't answer the only question that matters:<br><small>“Which of my other vendors are now exposed, and do I act today?”</small></li>
+    </ul>
+    <div class="foot"><span>Vendor Radar Risk</span><span>2 / 12</span></div>
+  </section>
+
+  <!-- 3 WHY NOW -->
+  <section class="slide">
+    <span class="kicker">Why now</span>
+    <h2>The 2024–2026 breach story is <span class="accent">connection risk</span>.</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Salesloft-Drift</h3><p>One OAuth token cascade reached 700+ orgs — Salesforce, GitHub, CrowdStrike, Slack.</p></div>
+      <div class="card"><h3>Okta → Cloudflare</h3><p>Stolen Okta credentials pivoted into Cloudflare's internal Atlassian.</p></div>
+      <div class="card"><h3>Snowflake</h3><p>Third-party integrator tokens exposed downstream customer data.</p></div>
+    </div>
+    <p class="lead" style="margin-top:22px">Vendor scores in isolation miss this entirely. The risk lives <b class="k">between</b> vendors.</p>
+    <div class="foot"><span>Vendor Radar Risk</span><span>3 / 12</span></div>
+  </section>
+
+  <!-- 4 SOLUTION -->
+  <section class="slide">
+    <span class="kicker">Our Solution</span>
+    <h2>Turn the <span class="accent">live web</span> into continuous, cited risk intelligence.</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Discover</h3><p>Real-time sweep of Google News, breach trackers, CVE feeds, status pages & regulatory portals — per vendor.</p></div>
+      <div class="card"><h3>Extract</h3><p>AI converts raw pages into structured risk signals. Every signal needs a real source URL — never invented.</p></div>
+      <div class="card"><h3>Score</h3><p>Transparent 0–100 risk score with recency decay & vendor weighting.</p></div>
+      <div class="card"><h3>Act</h3><p>Alerts on new signals + <b class="k">Blast Radius</b> verdicts on cross-vendor cascades.</p></div>
+    </div>
+    <div class="foot"><span>Vendor Radar Risk</span><span>4 / 12</span></div>
+  </section>
+
+  <!-- 5 DIFFERENTIATOR -->
+  <section class="slide">
+    <span class="kicker">The Differentiator</span>
+    <h2><span class="accent">Blast Radius</span> — cascade exposure detection</h2>
+    <p class="lead">It reads recent security incidents across all vendors, auto-discovers the connections (shared attacker, OAuth token, identity provider, cross-vendor mention), clusters them, and issues a verdict per incident.</p>
+    <div class="card" style="margin-top:20px">
+      <div class="verdict v-inv">🛡 INVESTIGATE NOW</div>
+      <span style="margin-left:12px;color:var(--mut)">Salesloft-Drift incident · connected by <span class="mono">salesloft · drift · oauth</span></span>
+      <div style="margin-top:12px">
+        <span class="chip">CrowdStrike</span><span class="chip">GitHub</span><span class="chip">Salesforce</span><span class="chip">Slack</span>
+      </div>
+      <p style="margin-top:10px;color:var(--mut)">→ Rotate shared tokens and audit the integrations now. <span class="src">(4 cited sources)</span></p>
+    </div>
+    <p style="margin-top:14px;color:var(--dim)">Correctly separates the 4-vendor OAuth cascade from the Okta–Cloudflare identity incident.</p>
+    <div class="foot"><span>Vendor Radar Risk</span><span>5 / 12</span></div>
+  </section>
+
+  <!-- 6 ARCHITECTURE -->
+  <section class="slide">
+    <span class="kicker">Architecture</span>
+    <h2>One pipeline, fully <span class="accent">cited</span>, end to end</h2>
+    <div class="flow">
+      <div class="node bd"><b>Bright Data SERP</b><span>news discovery, 6 queries/vendor</span></div>
+      <div class="arrow">→</div>
+      <div class="node bd"><b>Web Unlocker</b><span>403→200 on bot-protected pages</span></div>
+      <div class="arrow">→</div>
+      <div class="node ai"><b>AI/ML API · Claude</b><span>structured extraction, locked schema</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><b>Risk Scorer</b><span>0–100, recency decay, deltas</span></div>
+      <div class="arrow">→</div>
+      <div class="node out"><b>Blast Radius</b><span>cascade graph + verdicts</span></div>
+    </div>
+    <div class="flow" style="margin-top:16px">
+      <div class="node"><b>FastAPI + SQLite</b><span>REST API · persistence</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><b>React dashboard</b><span>scores · alerts · proof · Blast Radius</span></div>
+      <div class="arrow">+</div>
+      <div class="node out"><b>Hosted MCP (SSE)</b><span>ask any AI agent: “am I exposed?”</span></div>
+    </div>
+    <div class="foot"><span>Vendor Radar Risk</span><span>6 / 12</span></div>
+  </section>
+
+  <!-- 7 TECH / BRIGHT DATA USE -->
+  <section class="slide">
+    <span class="kicker">Technologies — meaningful Bright Data use</span>
+    <h2>3 Bright Data products + AI + MCP</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Bright Data SERP API</h3><p>Live Google News discovery — the freshness engine. 6 risk-category queries per vendor.</p></div>
+      <div class="card"><h3>Bright Data Web Unlocker</h3><p>Bypasses bot protection on breach trackers & trust centers. Provable 403→200.</p></div>
+      <div class="card"><h3>MCP Server (hosted)</h3><p>Our own MCP server, online over SSE — agent-native risk tools.</p></div>
+    </div>
+    <div style="margin-top:20px">
+      <span class="pill">AI/ML API · Claude</span><span class="pill">FastAPI</span><span class="pill">React + TypeScript</span>
+      <span class="pill">SQLite</span><span class="pill">Docker</span><span class="pill">Hugging Face Spaces</span>
+      <span class="pill">GitHub Actions CI</span><span class="pill">Pytest ×50</span>
+    </div>
+    <div class="foot"><span>Vendor Radar Risk</span><span>7 / 12</span></div>
+  </section>
+
+  <!-- 8 DEMO -->
+  <section class="slide">
+    <span class="kicker">Live Demo — what we'll show</span>
+    <h2>It's <span class="accent">live</span>, not slideware</h2>
+    <ul>
+      <li><b class="k">Dashboard</b> — 10 vendors, color-coded scores, risk landscape radar.</li>
+      <li><b class="k">Blast Radius</b> — the Salesloft cascade with INVESTIGATE verdict + citations.</li>
+      <li><b class="k">403 → 200 proof</b> — naive fetch blocked, Web Unlocker succeeds, side by side.</li>
+      <li><b class="k">Live scan</b> — click Scan; ~40s later fresh, dated, cited signals appear.</li>
+      <li><b class="k">Hosted MCP</b> — ask Claude “Am I exposed to a cascading breach this week?”</li>
+    </ul>
+    <p style="margin-top:16px" class="mono">suriya911-third-party-risk-radar.hf.space</p>
+    <div class="foot"><span>Vendor Radar Risk</span><span>8 / 12</span></div>
+  </section>
+
+  <!-- 9 OUTCOMES -->
+  <section class="slide">
+    <span class="kicker">Outcomes — verified in production</span>
+    <h2>Real data, real cascades, <span class="accent">shipped</span></h2>
+    <div class="grid g4">
+      <div class="card"><div class="stat red">94.8</div><p>Okta — Critical, from cited incidents</p></div>
+      <div class="card"><div class="stat purple">2</div><p>distinct cascades auto-detected</p></div>
+      <div class="card"><div class="stat green">68→87</div><p>Salesforce live-scan score jump (securityweek, cybernews)</p></div>
+      <div class="card"><div class="stat blue">50</div><p>tests passing · CI green</p></div>
+    </div>
+    <ul style="margin-top:18px">
+      <li>Live scan verified on the hosted Space — fresh sources, never mocked.</li>
+      <li>Deployed as one Docker container on Hugging Face Spaces; MCP online over SSE.</li>
+    </ul>
+    <div class="foot"><span>Vendor Radar Risk</span><span>9 / 12</span></div>
+  </section>
+
+  <!-- 10 WHY WE WIN -->
+  <section class="slide">
+    <span class="kicker">Why it wins</span>
+    <h2>Solves the <span class="accent">unsolved</span> part of vendor risk</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Real problem</h3><p>Cascade breaches are THE 2024–2026 enterprise security story. We address it head-on.</p></div>
+      <div class="card"><h3>Novel</h3><p>Everyone scores vendors in isolation. Nobody auto-maps the live connection graph.</p></div>
+      <div class="card"><h3>Deep Bright Data use</h3><p>SERP + Web Unlocker are core to the product, not bolted on.</p></div>
+      <div class="card"><h3>Agent-native</h3><p>Hosted MCP makes the whole system usable by any AI agent.</p></div>
+    </div>
+    <div class="foot"><span>Vendor Radar Risk</span><span>10 / 12</span></div>
+  </section>
+
+  <!-- 11 NEXT -->
+  <section class="slide">
+    <span class="kicker">What's next</span>
+    <h2>From hackathon to <span class="accent">product</span></h2>
+    <ul>
+      <li>Continuous scheduled scans + Slack/email cascade alerts.</li>
+      <li>Deeper connection graph: shared sub-processors & 4th-party dependencies.</li>
+      <li>Score-history trends and exposure-over-time per cascade.</li>
+      <li>CSV/SSO vendor import for real enterprise portfolios.</li>
+    </ul>
+    <div class="foot"><span>Vendor Radar Risk</span><span>11 / 12</span></div>
+  </section>
+
+  <!-- 12 CLOSE -->
+  <section class="slide title-wrap">
+    <span class="kicker">Thank you</span>
+    <h1>Know <span style="color:var(--purple)">first</span>.<br>Not from the news.</h1>
+    <div style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
+      <span><b class="k">Live demo</b> &nbsp; <span class="mono">suriya911-third-party-risk-radar.hf.space</span></span>
+      <span><b class="k">Code</b> &nbsp; <span class="mono">github.com/suriya911/3rd-Party-Risk-Radar-System</span></span>
+      <span><b class="k">MCP</b> &nbsp; <span class="mono">…hf.space/mcp/sse</span></span>
+    </div>
+    <div style="margin-top:26px">
+      <span class="pill bd">Bright Data SERP</span><span class="pill bd">Web Unlocker</span>
+      <span class="pill">AI/ML API</span><span class="pill">MCP</span>
+    </div>
+    <div class="foot"><span>Team bigbros · Vendor Radar Risk</span><span>12 / 12</span></div>
+  </section>
+
+</div>
+<div class="hint">← → / Space to navigate · F fullscreen · P print to PDF</div>
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  const prog=document.getElementById('prog');
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    prog.style.width=((i+1)/slides.length*100)+'%';
+  }
+  function fs(){ if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen(); }
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    else if(e.key==='Home')show(0);
+    else if(e.key==='End')show(slides.length-1);
+    else if(e.key.toLowerCase()==='f')fs();
+    else if(e.key.toLowerCase()==='p')window.print();
+  });
+  document.addEventListener('click',e=>{ if(e.clientX>window.innerWidth*0.5)show(i+1);else show(i-1); });
+  show(0);
+</script>
+</body>
+</html>

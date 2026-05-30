@@ -25,7 +25,7 @@ from backend.db import database as db
 from backend.scoring.risk_scorer import score_label, score_color
 from backend.analysis.blast_radius import detect_blast_radius
 
-server = Server("third-party-risk-radar")
+server = Server("vendor-radar-risk")
 
 
 @server.list_tools()

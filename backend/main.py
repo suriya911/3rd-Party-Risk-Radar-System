@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Third-Party Risk Radar",
+    title="Vendor Radar Risk",
     description="Continuous, cited vendor risk intelligence on Bright Data live web infrastructure",
     version="1.0.0",
     lifespan=lifespan,
