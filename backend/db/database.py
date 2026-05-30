@@ -210,6 +210,27 @@ def get_new_signals_since(since_date: str) -> list[dict]:
         return [dict(r) for r in rows]
 
 
+def get_latest_run_signals_all() -> list[dict]:
+    """Every vendor's signals from its most recent completed run (the current
+    state across all vendors, de-duplicated). Used by the Blast Radius engine."""
+    with get_db() as conn:
+        runs = conn.execute(
+            """
+            SELECT vendor_name, MAX(id) AS run_id
+            FROM scan_runs
+            WHERE status = 'done'
+            GROUP BY vendor_name
+            """
+        ).fetchall()
+        out: list[dict] = []
+        for r in runs:
+            rows = conn.execute(
+                "SELECT * FROM risk_signals WHERE run_id = ?", (r["run_id"],)
+            ).fetchall()
+            out.extend(dict(x) for x in rows)
+        return out
+
+
 def get_known_summaries(vendor: str) -> set[str]:
     """Return summaries from previous runs to detect duplicates."""
     with get_db() as conn:

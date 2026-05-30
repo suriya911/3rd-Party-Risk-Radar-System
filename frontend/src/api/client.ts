@@ -48,6 +48,38 @@ export interface BlockedProof {
   proof: string;
 }
 
+export type Verdict = "INVESTIGATE" | "MONITOR" | "NO_ACTION";
+
+export interface BlastMember {
+  vendor: string;
+  severity: number;
+  summary: string;
+  source_url: string;
+  date_detected: string;
+}
+
+export interface BlastIncident {
+  title: string;
+  affected_vendors: string[];
+  vendor_count: number;
+  max_severity: number;
+  link_terms: string[];
+  first_seen: string;
+  last_seen: string;
+  verdict: Verdict;
+  recommendation: string;
+  members: BlastMember[];
+  citations: string[];
+}
+
+export interface BlastRadius {
+  generated_at: string;
+  window_days: number;
+  incident_count: number;
+  incidents: BlastIncident[];
+  standalone: BlastIncident[];
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const resp = await fetch(`${BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
@@ -83,5 +115,10 @@ export const api = {
   getUnblockedProof: (url?: string) => {
     const qs = url ? `?url=${encodeURIComponent(url)}` : "";
     return request<BlockedProof>(`/proof/unblocked${qs}`);
+  },
+
+  getBlastRadius: (windowDays?: number) => {
+    const qs = windowDays ? `?window_days=${windowDays}` : "";
+    return request<BlastRadius>(`/threats/blast-radius${qs}`);
   },
 };

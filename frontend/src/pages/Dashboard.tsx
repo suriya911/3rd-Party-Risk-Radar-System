@@ -3,6 +3,7 @@ import { RefreshCw, Radio, AlertTriangle, ShieldCheck, Activity } from "lucide-r
 import { api, Vendor } from "../api/client";
 import VendorTable from "../components/VendorTable";
 import AlertFeed from "../components/AlertFeed";
+import BlastRadiusPanel from "../components/BlastRadiusPanel";
 import UnblockedProofPanel from "../components/UnblockedProofPanel";
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -99,6 +100,11 @@ export default function Dashboard() {
         <StatCard label="Critical Risk" value={critical} sub="score ≥ 75" icon={AlertTriangle} color="text-red-400" />
         <StatCard label="High Risk" value={high} sub="score 50–74" icon={AlertTriangle} color="text-orange-400" />
         <StatCard label="Total Signals" value={totalSignals} sub="across all vendors" icon={Activity} color="text-green-400" />
+      </div>
+
+      {/* Blast Radius — cascade exposure (headline feature) */}
+      <div className="mb-6">
+        <BlastRadiusPanel />
       </div>
 
       {/* Main Content */}

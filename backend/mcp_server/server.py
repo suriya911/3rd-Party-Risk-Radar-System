@@ -23,6 +23,7 @@ from mcp.types import Tool, TextContent
 
 from backend.db import database as db
 from backend.scoring.risk_scorer import score_label, score_color
+from backend.analysis.blast_radius import detect_blast_radius
 
 server = Server("third-party-risk-radar")
 
@@ -76,6 +77,26 @@ async def list_tools() -> list[Tool]:
                     "date": {
                         "type": "string",
                         "description": "ISO date string YYYY-MM-DD. Defaults to 7 days ago.",
+                    }
+                },
+            },
+        ),
+        Tool(
+            name="check_exposure",
+            description=(
+                "Blast Radius: find recent SECURITY incidents that connect two or more "
+                "of your vendors (shared attacker, OAuth token, identity provider, "
+                "cross-vendor mention) and return an action verdict per incident "
+                "(INVESTIGATE / MONITOR / NO_ACTION). Answers 'which of my vendors are "
+                "exposed through each other, and should I act?'"
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "window_days": {
+                        "type": "number",
+                        "description": "How many days back to consider. Default: 30.",
+                        "default": 30,
                     }
                 },
             },
@@ -168,6 +189,35 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 lines.append(
                     f"- **[{s['category']} / {s['severity']}/5]** {s['summary']}\n"
                     f"  Source: {s['source_url']}"
+                )
+
+        return [TextContent(type="text", text="\n".join(lines))]
+
+    elif name == "check_exposure":
+        window = int(arguments.get("window_days", 30))
+        report = detect_blast_radius(db.get_latest_run_signals_all(), window_days=window)
+        incidents = report["incidents"]
+        standalone = [s for s in report["standalone"] if s["verdict"] != "NO_ACTION"]
+
+        if not incidents and not standalone:
+            return [TextContent(type="text", text=f"No connected security incidents in the last {window} days.")]
+
+        lines = [f"## Blast Radius — exposure in the last {window} days\n"]
+        if incidents:
+            lines.append(f"**{len(incidents)} cross-vendor cascade(s) detected:**\n")
+            for inc in incidents:
+                lines.append(f"### {inc['title']}  —  **{inc['verdict']}**")
+                lines.append(f"- Connected vendors ({inc['vendor_count']}): {', '.join(inc['affected_vendors'])}")
+                lines.append(f"- Linked by: {', '.join(inc['link_terms'][:6])}")
+                lines.append(f"- {inc['recommendation']}")
+                for c in inc["citations"][:4]:
+                    lines.append(f"  - Source: {c}")
+                lines.append("")
+        if standalone:
+            lines.append("**Single-vendor issues worth attention:**")
+            for s in standalone:
+                lines.append(
+                    f"- **{s['affected_vendors'][0]}** ({s['verdict']}, max sev {s['max_severity']}/5): {s['recommendation']}"
                 )
 
         return [TextContent(type="text", text="\n".join(lines))]

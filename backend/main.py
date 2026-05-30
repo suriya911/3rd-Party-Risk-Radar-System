@@ -19,6 +19,7 @@ from backend.collectors.unlocker_collector import collect_unlocker, fetch_naive,
 from backend.collectors.scraper_collector import collect_scraper
 from backend.extraction.claude_extractor import extract_signals
 from backend.scoring.risk_scorer import score_and_persist, score_label, score_color
+from backend.analysis.blast_radius import detect_blast_radius
 
 logging.basicConfig(level=getattr(logging, settings.log_level))
 logger = logging.getLogger(__name__)
@@ -268,6 +269,21 @@ async def import_vendors(file: UploadFile = File(...)):
             )
             count += 1
     return {"imported": count}
+
+
+@app.get("/threats/blast-radius", tags=["threats"])
+async def blast_radius(window_days: int = 30):
+    """
+    Blast Radius — cross-vendor cascade exposure.
+
+    Finds recent security incidents that connect two or more of your vendors
+    (shared attacker, OAuth token, identity provider, cross-vendor mention) and
+    returns an action verdict per incident: INVESTIGATE / MONITOR / NO_ACTION.
+    This answers the question vendor scores can't: *which of my vendors are
+    exposed through each other, and do I need to act today?*
+    """
+    signals = db.get_latest_run_signals_all()
+    return detect_blast_radius(signals, window_days=window_days)
 
 
 @app.get("/health", tags=["system"])
