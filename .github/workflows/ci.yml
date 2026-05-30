@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    name: Unit & API tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests (live/external tests excluded)
+        run: python -m pytest
+
+  frontend-build:
+    name: Frontend type-check & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run build      # `tsc && vite build` — fails on any type error
+
+  docker:
+    name: Docker build & smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t risk-radar:ci .
+
+      - name: Run container
+        run: docker run -d --name rr -p 7860:7860 risk-radar:ci
+
+      - name: Wait for health & verify seeded data
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:7860/health >/dev/null; then
+              echo "container healthy"; break
+            fi
+            sleep 2
+          done
+          curl -sf http://localhost:7860/health
+          curl -sf http://localhost:7860/vendors | grep -q Okta
+          echo "smoke test passed"
+
+      - name: Container logs (on failure)
+        if: failure()
+        run: docker logs rr
+
+      - name: Tear down
+        if: always()
+        run: docker rm -f rr || true

@@ -31,8 +31,7 @@ async def _serp_request(client: httpx.AsyncClient, url: str) -> Optional[dict]:
     payload = {
         "zone": settings.brightdata_serp_zone,
         "url": url,
-        "format": "json",
-        "country": "us",
+        "format": "raw",  # body is the parsed SERP JSON (via brd_json=1 in the URL)
     }
     try:
         resp = await client.post(BRIGHTDATA_API, json=payload, headers=headers, timeout=30)
@@ -44,15 +43,21 @@ async def _serp_request(client: httpx.AsyncClient, url: str) -> Optional[dict]:
 
 
 def _build_google_news_url(query: str) -> str:
-    from urllib.parse import urlencode, quote_plus
-    params = urlencode({"q": query, "tbm": "nws", "tbs": "qdr:m"})  # past month
+    from urllib.parse import urlencode
+    # brd_json=1 → Bright Data returns parsed SERP JSON instead of raw HTML.
+    params = urlencode({"q": query, "tbm": "nws", "tbs": "qdr:m", "brd_json": "1"})
     return f"https://www.google.com/search?{params}"
 
 
 def _extract_organic_results(serp_data: dict) -> list[dict]:
     """Pull title, url, snippet from SERP JSON response."""
     results = []
-    organic = serp_data.get("organic", []) or serp_data.get("results", [])
+    # News queries (tbm=nws) return a "news" array; web queries return "organic".
+    organic = (
+        serp_data.get("organic")
+        or serp_data.get("news")
+        or serp_data.get("results", [])
+    )
     for item in organic[:8]:
         url = item.get("url") or item.get("link", "")
         title = item.get("title", "")

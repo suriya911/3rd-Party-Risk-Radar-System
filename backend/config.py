@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     anthropic_api_key: str = Field("", env="ANTHROPIC_API_KEY")
     claude_model: str = Field("claude-sonnet-4-6", env="CLAUDE_MODEL")
 
+    # LLM provider for signal extraction — OpenAI-compatible endpoint.
+    # Default targets AI/ML API (aimlapi.com), which serves Claude + GPT models.
+    # LLM_API_KEY falls back to ANTHROPIC_API_KEY if unset.
+    llm_api_key: str = Field("", env="LLM_API_KEY")
+    llm_base_url: str = Field("https://api.aimlapi.com/v1", env="LLM_BASE_URL")
+    llm_model: str = Field("claude-sonnet-4-5", env="LLM_MODEL")
+
     database_url: str = Field("./risk_radar.db", env="DATABASE_URL")
     vendors_csv: str = Field("./vendors.csv", env="VENDORS_CSV")
     log_level: str = Field("INFO", env="LOG_LEVEL")
@@ -25,6 +32,11 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         extra = "ignore"
+
+    @property
+    def effective_llm_key(self) -> str:
+        """LLM_API_KEY if provided, else fall back to ANTHROPIC_API_KEY."""
+        return self.llm_api_key or self.anthropic_api_key
 
     @property
     def cors_origins_list(self) -> list[str]:

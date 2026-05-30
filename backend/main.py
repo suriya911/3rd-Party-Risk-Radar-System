@@ -273,3 +273,25 @@ async def import_vendors(file: UploadFile = File(...)):
 @app.get("/health", tags=["system"])
 async def health():
     return {"status": "ok", "time": datetime.utcnow().isoformat()}
+
+
+# ── Frontend (single-container deploy) ─────────────────────────────────────
+# In Docker / Hugging Face Spaces the Vite build is copied to ../frontend_dist
+# and served from the same origin as the API, so the client uses relative paths
+# (no CORS, no separate web server). Skipped in local dev, where Vite serves it.
+_FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend_dist"
+
+if _FRONTEND_DIR.is_dir():
+    from fastapi.responses import FileResponse
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str):
+        """Serve real static files; fall back to index.html for SPA routes.
+
+        Registered last, so all API routes above take precedence. The
+        path-traversal guard keeps requests inside the build directory.
+        """
+        candidate = (_FRONTEND_DIR / full_path).resolve()
+        if full_path and _FRONTEND_DIR in candidate.parents and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIR / "index.html")

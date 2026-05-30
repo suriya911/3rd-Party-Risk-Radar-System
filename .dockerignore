@@ -1,0 +1,32 @@
+# VCS / IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Secrets — never bake into the image (set as env vars / HF Spaces secrets)
+.env
+*.env
+
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Node / frontend (rebuilt inside the image)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Local databases
+*.db
+*.sqlite
+
+# Docs / misc not needed at runtime
+*.pdf
+status.md
+DEPLOY.md

@@ -1,0 +1,23 @@
+# Local run of the exact same image deployed to Hugging Face Spaces.
+#   docker compose up --build   →   http://localhost:7860
+#
+# Seeded demo data needs no keys. For live scans, create a .env first
+# (cp .env.example .env) and add BRIGHTDATA_API_TOKEN + ANTHROPIC_API_KEY.
+services:
+  app:
+    build: .
+    ports:
+      - "7860:7860"
+    env_file:
+      # Optional — present only if you created .env. Requires Compose v2.24+.
+      - path: .env
+        required: false
+    environment:
+      # Persist the DB on the named volume instead of the ephemeral container fs.
+      DATABASE_URL: /app/data/risk_radar.db
+    volumes:
+      - risk_radar_db:/app/data
+    restart: unless-stopped
+
+volumes:
+  risk_radar_db:

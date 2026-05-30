@@ -1,0 +1,6 @@
+# Force LF on files executed inside Linux containers — prevents CRLF
+# "bad interpreter" errors when cloned/edited on Windows.
+*.sh    text eol=lf
+Dockerfile text eol=lf
+*.py    text eol=lf
+*.pdf   binary

@@ -4,14 +4,18 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-import anthropic
+from openai import OpenAI
 from bs4 import BeautifulSoup
 
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
 
-client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+
+def _get_client() -> OpenAI:
+    """Build the LLM client lazily — avoids an import-time crash when no key is
+    set (seeded demo mode). Targets any OpenAI-compatible endpoint (AI/ML API)."""
+    return OpenAI(api_key=settings.effective_llm_key, base_url=settings.llm_base_url)
 
 SIGNAL_SCHEMA = {
     "type": "object",
@@ -143,14 +147,15 @@ async def extract_signals(
     )
 
     try:
-        message = client.messages.create(
-            model=settings.claude_model,
+        client = _get_client()
+        message = client.chat.completions.create(
+            model=settings.llm_model,
             max_tokens=4096,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw = message.content[0].text.strip()
+        raw = (message.choices[0].message.content or "").strip()
 
-        # Extract JSON from response (Claude sometimes wraps in ```json)
+        # Extract JSON from response (models sometimes wrap in ```json)
         if "```" in raw:
             raw = raw.split("```")[1]
             if raw.startswith("json"):
@@ -166,12 +171,12 @@ async def extract_signals(
                 valid["date_detected"] = today if not valid.get("date_detected") else valid["date_detected"]
                 validated.append(valid)
 
-        logger.info("Claude extracted %d valid signals for %s", len(validated), vendor_name)
+        logger.info("LLM extracted %d valid signals for %s", len(validated), vendor_name)
         return validated
 
     except json.JSONDecodeError as e:
-        logger.error("Claude JSON parse error for %s: %s", vendor_name, e)
+        logger.error("LLM JSON parse error for %s: %s", vendor_name, e)
         return []
-    except anthropic.APIError as e:
-        logger.error("Claude API error for %s: %s", vendor_name, e)
+    except Exception as e:
+        logger.error("LLM API error for %s: %s", vendor_name, e)
         return []

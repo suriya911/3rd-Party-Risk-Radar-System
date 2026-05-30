@@ -1,3 +1,13 @@
+---
+title: Third-Party Risk Radar
+emoji: 📡
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Third-Party Risk Radar
 
 **Continuous, cited vendor risk intelligence — built on Bright Data live web infrastructure**
