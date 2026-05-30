@@ -116,7 +116,7 @@ function IncidentCard({ incident }: { incident: BlastIncident }) {
   );
 }
 
-export default function BlastRadiusPanel() {
+export default function BlastRadiusPanel({ refreshKey = 0 }: { refreshKey?: number }) {
   const [incidents, setIncidents] = useState<BlastIncident[]>([]);
   const [standalone, setStandalone] = useState<BlastIncident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +130,7 @@ export default function BlastRadiusPanel() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [refreshKey]);
 
   const investigate = incidents.filter((i) => i.verdict === "INVESTIGATE").length;
 

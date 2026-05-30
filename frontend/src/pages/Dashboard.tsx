@@ -29,11 +29,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [scanningAll, setScanningAll] = useState(false);
   const [error, setError] = useState("");
+  // Bumped on every reload so child panels (Blast Radius, Alert Feed) re-fetch.
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const load = useCallback(async () => {
     try {
       const data = await api.getVendors();
       setVendors(data);
+      setRefreshKey((k) => k + 1);
       setError("");
     } catch (e: any) {
       setError(e.message);
@@ -46,12 +49,22 @@ export default function Dashboard() {
 
   const handleScanAll = async () => {
     setScanningAll(true);
+    setError("");
     try {
       await api.scanAll();
-      setTimeout(load, 3000);
+      // /scan/all runs vendors sequentially in the background (minutes), so we
+      // poll and the dashboard updates progressively as each vendor completes.
+      let polls = 0;
+      const iv = setInterval(async () => {
+        polls += 1;
+        await load();
+        if (polls >= 30) {
+          clearInterval(iv);
+          setScanningAll(false);
+        }
+      }, 10000);
     } catch (e: any) {
       setError(e.message);
-    } finally {
       setScanningAll(false);
     }
   };
@@ -112,7 +125,7 @@ export default function Dashboard() {
 
       {/* Blast Radius — cascade exposure (headline feature) */}
       <div className="mb-6">
-        <BlastRadiusPanel />
+        <BlastRadiusPanel refreshKey={refreshKey} />
       </div>
 
       {/* Main Content */}
@@ -155,7 +168,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          <AlertFeed />
+          <AlertFeed refreshKey={refreshKey} />
         </div>
       </div>
 

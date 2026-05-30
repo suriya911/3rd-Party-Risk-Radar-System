@@ -4,7 +4,7 @@ import { api, Signal } from "../api/client";
 import SeverityBadge from "./SeverityBadge";
 import CategoryBadge from "./CategoryBadge";
 
-export default function AlertFeed() {
+export default function AlertFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [since, setSince] = useState(() => {
     const d = new Date();
@@ -19,7 +19,7 @@ export default function AlertFeed() {
       .then((r) => setSignals(r.signals))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [since]);
+  }, [since, refreshKey]);
 
   return (
     <div className="rounded-xl border border-white/10 bg-[#1a1d2e] p-5">
